@@ -4,7 +4,7 @@ const Layout = ({ children }) => {
       <header className="flex justify-center items-center h-16 bg-red-500">
         <h1 className="text-white text-4xl tracking-wide text-semibold">Pokedex</h1>
       </header>
-      <div className="m-4">
+      <div className="m-8">
         { children }
       </div>
     </div>

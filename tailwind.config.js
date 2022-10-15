@@ -40,4 +40,11 @@ module.exports = {
     },
   },
   plugins: [],
+  safelist: [
+    {
+      pattern: /bg-(fire|grass|electric|water|ground|rock|fairy|poison|bug|dragon|psychic|flying|fighting|normal|dark|steel|ice|ghost)/
+    }, {
+      pattern: /border-(t|b|r|l)-(fire|grass|electric|water|ground|rock|fairy|poison|bug|dragon|psychic|flying|fighting|normal|dark|steel|ice|ghost)/
+    }
+  ]
 }
