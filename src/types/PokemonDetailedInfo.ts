@@ -1,6 +1,8 @@
 export interface PokemonDetailedInfo {
   id: number
   name: string
+  weight: number,
+  height: number,
   types: [
     { 
       type: {
@@ -16,18 +18,18 @@ export interface PokemonDetailedInfo {
     {
       ability: {
         name: string
-        is_hidden: boolean
       }
+      is_hidden: boolean
     }, {
       ability: {
         name: string
-        is_hidden: boolean
       }
+      is_hidden: boolean
     }?, {
       ability: {
         name: string
-        is_hidden: true
       }
+      is_hidden: boolean
     }?
   ]
   stats: [
