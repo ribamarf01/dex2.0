@@ -7,11 +7,15 @@ import { PokemonCardInfo } from "../types/PokemonCardInfo"
 
 const Home = () => {
 
-  const [loading, setLoading] = useState<boolean>(true)
-  const [pokemonList, setPokemonList] = useState<PokemonCardInfo[]>([])
   let offset = 0
 
+  const [loading, setLoading] = useState<boolean>(true)
+  const [pokemonList, setPokemonList] = useState<PokemonCardInfo[]>([])
+
   const fetchData = async () => {
+
+    setLoading(loading => true)
+
     const data = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=30&offset=${offset}`)
     const pokemons = await data.json()
     
@@ -22,20 +26,22 @@ const Home = () => {
       return await data.json() as PokemonCardInfo
     }))
     
-    setPokemonList(pokemonList => [...pokemonList, ...pokes])
-    offset += 30
+    setPokemonList(pokemonList => {
+      offset = offset + 30
+      return [...pokemonList, ...pokes]
+    })
   }
 
   const handleScroll = (e) => {
-    if(window.innerHeight + e.target.documentElement.scrollTop + 1 >= e.target.documentElement.scrollHeight) {
-      setLoading(true)
+    if(window.innerHeight + e.target.documentElement.scrollTop === e.target.documentElement.offsetHeight) {
       fetchData()
-      setLoading(false)
+      setLoading(loading => false)
     }
   }
  
   useEffect(() => {
-    fetchData().catch(err => console.log(err))
+    fetchData()
+    setLoading(loading => false)
     window.addEventListener('scroll', handleScroll)
   }, [])
 
