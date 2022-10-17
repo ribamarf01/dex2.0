@@ -1,0 +1,1 @@
+export const removeMinus = (str: string) => str.split('-')[0] 

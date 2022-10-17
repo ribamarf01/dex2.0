@@ -7,6 +7,9 @@ import { useRouter } from 'next/router'
 import StatBar from 'src/components/StatBar'
 import LinkBox from 'src/components/LinkBox'
 
+import { capitalizer } from 'src/utils/Capitalizer'
+import { removeMinus } from 'src/utils/RemoveMinus'
+
 import type { GetStaticPaths, GetStaticProps } from "next"
 
 import type { PokemonLink } from "../../types/PokemonLink"
@@ -24,8 +27,6 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
 
   const router = useRouter()
 
-  const capitalizer = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
-
   const replacer = (str: string, char: string) => str.replaceAll(char, ' ')
 
   const numberDotPlacer = (str: number | string): string => {
@@ -35,13 +36,13 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
 
   return <div className="flex-1 flex flex-row justify-around items-center">
     <Head>
-      <title>{ capitalizer(router.query.name.toString()) } | Pokedex!</title>
+      <title>{ removeMinus(capitalizer(router.query.name.toString())) } | Pokedex!</title>
     </Head>
     <LinkBox name={prev.name} side='left' id={ pokemon.id === 1 ? 904 : pokemon.id - 1 } />
     
     <div className='flex flex-col items-center w-1/3'>
       <p className='capitalize text-3xl'>#{ pokemon.id }</p>
-      <p className='capitalize text-3xl'>{ pokemon.name }</p>
+      <p className='capitalize text-3xl'>{ removeMinus(pokemon.name) }</p>
       <img className='w-64' src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.id}.png`} alt="Pokemon image" />
       
       <div className='flex flex-row justify-center text-center w-full gap-x-4'>
@@ -94,7 +95,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const pokemonData = await fetch(`https://pokeapi.co/api/v2/pokemon/${params.name}`)
   const pokemon = await pokemonData.json() as PokemonDetailedInfo
 
-  const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${params.name}`)
+  const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${removeMinus(params.name.toString())}`)
   const pokemonSpecs = await speciesData.json() as SpeciesInfo
 
   let prevNext: string[] = ["", ""]

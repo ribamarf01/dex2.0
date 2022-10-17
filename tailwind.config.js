@@ -4,6 +4,10 @@ module.exports = {
     "src/**/*.tsx"
   ],
   theme: {
+    fontFamily: {
+      'rslab': ['Roboto Slab'],
+      'rubik': ['Rubik']
+    },
     extend: {
       colors: {
         fire: '#d93106',
