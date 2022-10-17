@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 
+import Head from 'next/head'
+
 import PokemonCard from 'src/components/Card'
 
 import { PokemonLink } from "../types/PokemonLink"
@@ -46,6 +48,9 @@ const Home = () => {
   }, [])
 
   return <div className='grid grid-cols-5 w-full place-items-center gap-8'>
+    <Head>
+      <title>Pokedex!</title>
+    </Head>
     { pokemonList.map(item => <PokemonCard key={item.id} id={item.id} name={item.name} types={item.types} />) }
     { loading ? <div className='w-16 h-16 border-4 border-t-red-500 border-red-400 animate-spin rounded-full col-span-full'><span className='hidden'>loading</span></div> : <></> }
   </div>

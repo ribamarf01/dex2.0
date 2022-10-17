@@ -1,13 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import { FC } from 'react'
 
-import { GetStaticPaths, GetStaticProps } from "next"
+import Head from 'next/head'
 
 import StatBar from 'src/components/StatBar'
 
-import { PokemonLink } from "../../types/PokemonLink"
-import { SpeciesInfo } from "../../types/SpeciesInfo"
-import { PokemonDetailedInfo } from "../../types/PokemonDetailedInfo"
+import type { GetStaticPaths, GetStaticProps } from "next"
+
+import type { PokemonLink } from "../../types/PokemonLink"
+import type { SpeciesInfo } from "../../types/SpeciesInfo"
+import type { PokemonDetailedInfo } from "../../types/PokemonDetailedInfo"
 
 interface PokemonInfoProps {
   pokemon: PokemonDetailedInfo
@@ -15,6 +17,8 @@ interface PokemonInfoProps {
 }
 
 const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs }) => {
+
+  const capitalizer = (str: string) => str.charAt(0).toUpperCase() + str.slice(1)
 
   const replacer = (str: string, char: string) => {
     return str.replaceAll(char, ' ')
@@ -26,6 +30,9 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs }) => {
   }
 
   return <div className="flex-1 flex flex-row justify-center items-center">
+    <Head>
+      <title> | Pokedex!</title>
+    </Head>
     <div className='flex-1'></div>
     
     <div className='flex flex-col items-center flex-1'>
@@ -86,7 +93,20 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${params.name}`)
   const pokemonSpecs = await speciesData.json() as SpeciesInfo
 
-  console.log(pokemon.abilities[1].is_hidden)
+  let prevNext: string[] = ["", ""]
+
+  if(pokemon.id === 1) {
+    prevNext[0] = "https://pokeapi.co/api/v2/pokemon?limit=1&offset=904"
+    prevNext[1] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=${pokemon.id}`
+  } else if (pokemon.id === 905) {
+    prevNext[0] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=${pokemon.id - 2}`
+    prevNext[1] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=0`
+  } else {
+    prevNext[0] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=${pokemon.id - 2}`
+    prevNext[1] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=${pokemon.id}`
+  }
+
+  console.log(await (await fetch(prevNext[0])).json())
 
   return {
     props: {
