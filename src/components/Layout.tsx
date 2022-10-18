@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
           <h1 className="text-white text-4xl tracking-wide text-semibold cursor-pointer">Pokedex</h1>
         </Link>
       </header>
-      <div className="w-full p-4 flex flex-col flex-1 font-rslab">
+      <div className="w-full p-8 flex flex-col flex-1 font-rslab">
         { children }
       </div>
     </div>
