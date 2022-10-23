@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 import Layout from 'src/components/Layout'
 
@@ -6,7 +6,6 @@ import '../styles/globals.css'
 
 const MyApp = ({ Component, pageProps, router }) => {
   return <Layout>
-    
       <motion.div 
         key={router.route} initial="pageInitial" animate="pageAnimate" exit="pageExit"
         variants={{
@@ -20,7 +19,6 @@ const MyApp = ({ Component, pageProps, router }) => {
       >
         <Component {...pageProps} />
       </motion.div>
-    
   </Layout>
   
 }

@@ -20,7 +20,8 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@types/*": ["./src/types/*"]
+      "@types/*": ["./src/types/*"],
+      "@global/*": ["./src/global/*"]
     }
   },
   "include": [
