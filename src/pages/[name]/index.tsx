@@ -4,6 +4,9 @@ import { FC } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 
+import { gql } from '@apollo/client'
+import client from '@global/apollo'
+
 import StatBar from 'src/components/StatBar'
 import LinkBox from 'src/components/LinkBox'
 
@@ -77,13 +80,27 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const data = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=904`)
-  const parsedData = await data.json()
+  const { data } = await client.query({
+    query: gql`
+      query PokeAPIquery {
+        list: pokemon_v2_pokemon(limit: 905) {
+          id
+          name
+        }
+      }
+    `
+  })
+  
+  const { list } = data
 
-  const links: PokemonLink[] = parsedData.results
-
-  const paths = links.map(item => ({ params: { name: item.name }}))
-
+  const paths = list.map(item => {
+    return {
+      params: {
+        name: item.name
+      }
+    }
+  })
+  
   return {
     paths,
     fallback: false
@@ -92,8 +109,34 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const pokemonData = await fetch(`https://pokeapi.co/api/v2/pokemon/${params.name}`)
-  const pokemon = await pokemonData.json() as PokemonDetailedInfo
+  const { data } = await client.query({
+    query: gql`
+      query Pokemon {
+        pokemon: pokemon_v2_pokemon(where: {name: {_eq: ${params.name}}}) {
+          id
+          name
+          height
+          weight
+          types: pokemon_v2_pokemontypes {
+            type: pokemon_v2_type {
+              name
+            }
+          }
+          abilities: pokemon_v2_pokemonabilities {
+            is_hidden
+            ability: pokemon_v2_ability {
+              name
+            }
+          }
+          stats: pokemon_v2_pokemonstats {
+            base_stat
+          }
+        }
+      }
+    `
+  })
+
+  const pokemon: PokemonDetailedInfo = data.pokemon[0]
 
   const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${removeMinus(params.name.toString())}`)
   const pokemonSpecs = await speciesData.json() as SpeciesInfo

@@ -1,4 +1,4 @@
-import { useState, useEffect, FC } from 'react'
+import { FC } from 'react'
 
 import Head from 'next/head'
 
@@ -7,7 +7,6 @@ import client from "@global/apollo"
 
 import PokemonCard from 'src/components/Card'
 
-import { PokemonLink } from "../types/PokemonLink"
 import { PokemonCardInfo } from "../types/PokemonCardInfo"
 
 import type { GetStaticProps } from 'next'
@@ -42,8 +41,6 @@ export const getStaticProps: GetStaticProps = async () => {
       }
     `
   })
-
-  console.log(data.pokemon)
 
   return {
     props: {
