@@ -46,5 +46,17 @@ export interface PokemonDetailedInfo {
     }, {
       base_stat: number
     }
-  ]
+  ],
+  species: {
+    species_name: [
+      {
+        genus: string
+      }
+    ]
+    species_flavor: [
+      {
+        flavor_text: string
+      }
+    ]
+  }
 }

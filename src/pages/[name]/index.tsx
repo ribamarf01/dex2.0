@@ -4,6 +4,7 @@ import { FC } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 
+import axios from 'axios'
 import { gql } from '@apollo/client'
 import client from '@global/apollo'
 
@@ -16,19 +17,18 @@ import { removeMinus } from 'src/utils/RemoveMinus'
 import type { GetStaticPaths, GetStaticProps } from "next"
 
 import type { PokemonLink } from "../../types/PokemonLink"
-import type { SpeciesInfo } from "../../types/SpeciesInfo"
 import type { PokemonDetailedInfo } from "../../types/PokemonDetailedInfo"
 
 interface PokemonInfoProps {
   pokemon: PokemonDetailedInfo
-  specs: SpeciesInfo
   prev: PokemonLink
   next: PokemonLink
 }
 
-const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
+const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, prev, next }) => {
 
   const router = useRouter()
+  const pageTitle = removeMinus(capitalizer(router.query.name.toString())) + " | Pokedex!"
 
   const replacer = (str: string, char: string) => str.replaceAll(char, ' ')
 
@@ -39,7 +39,7 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
 
   return <div className="flex-1 flex flex-row justify-around items-center">
     <Head>
-      <title>{ removeMinus(capitalizer(router.query.name.toString())) } | Pokedex!</title>
+      <title>{ pageTitle }</title>
     </Head>
     <LinkBox name={prev.name} side='left' id={ pokemon.id === 1 ? 904 : pokemon.id - 1 } />
     
@@ -53,8 +53,8 @@ const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, specs, prev, next }) => {
         { pokemon.types[1] !== undefined ? <span className={`border border-black bg-${pokemon.types[1].type.name} text-white capitalize rounded-full w-1/3`}>{pokemon.types[1].type.name}</span> : ""}
       </div>
 
-      <p className='text-center text-2xl mt-4'>{specs.genera[7].genus}</p>
-      <p className='text-center text-lg my-1'>{replacer(specs.flavor_text_entries[0].flavor_text, '')}</p>
+      <p className='text-center text-2xl mt-4'>{pokemon.species.species_name[0].genus}</p>
+      <p className='text-center text-lg my-1'>{pokemon.species.species_flavor[0].flavor_text}</p>
 
       <p className='text-center text-2xl mt-4'>Abilities: </p>
       <div className="flex flex-row gap-x-8">
@@ -109,37 +109,49 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
+
   const { data } = await client.query({
     query: gql`
-      query Pokemon {
-        pokemon: pokemon_v2_pokemon(where: {name: {_eq: ${params.name}}}) {
-          id
-          name
-          height
-          weight
-          types: pokemon_v2_pokemontypes {
-            type: pokemon_v2_type {
-              name
+      query Pokemon($pokemon: String!) {
+        pokemon: pokemon_v2_pokemon_aggregate(where: {name: {_eq: $pokemon}}) {
+          nodes {
+            id
+            name
+            height
+            weight
+            types: pokemon_v2_pokemontypes {
+              type: pokemon_v2_type {
+                name
+              }
             }
-          }
-          abilities: pokemon_v2_pokemonabilities {
-            is_hidden
-            ability: pokemon_v2_ability {
-              name
+            abilities: pokemon_v2_pokemonabilities {
+              is_hidden
+              ability: pokemon_v2_ability {
+                name
+              }
             }
-          }
-          stats: pokemon_v2_pokemonstats {
-            base_stat
+            stats: pokemon_v2_pokemonstats {
+              base_stat
+            }
+            species: pokemon_v2_pokemonspecy {
+              species_name: pokemon_v2_pokemonspeciesnames(where: {pokemon_v2_language: {name: {_eq: "en"}}}) {
+                genus
+              }
+              species_flavor: pokemon_v2_pokemonspeciesflavortexts(where: {pokemon_v2_language: {name: {_eq: "en"}}}, limit: 1) {
+                flavor_text
+              }
+            }
           }
         }
-      }
-    `
+      }   
+    `,
+    variables: {
+      pokemon: params.name
+    }
+
   })
 
-  const pokemon: PokemonDetailedInfo = data.pokemon[0]
-
-  const speciesData = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${removeMinus(params.name.toString())}`)
-  const pokemonSpecs = await speciesData.json() as SpeciesInfo
+  const pokemon : PokemonDetailedInfo = data.pokemon.nodes[0]
 
   let prevNext: string[] = ["", ""]
 
@@ -154,13 +166,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     prevNext[1] = `https://pokeapi.co/api/v2/pokemon?limit=1&offset=${pokemon.id}`
   }
 
-  const { results: prev } = await (await fetch(prevNext[0])).json()
-  const { results: next } = await (await fetch(prevNext[1])).json()
+  const { results: prev } = await (await axios.get(prevNext[0])).data
+  const { results: next } = await (await axios.get(prevNext[1])).data
 
   return {
     props: {
       pokemon,
-      specs: pokemonSpecs,
       prev: prev[0], 
       next: next[0]
     }
