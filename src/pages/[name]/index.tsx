@@ -28,7 +28,7 @@ interface PokemonInfoProps {
 const PokemonInfo: FC<PokemonInfoProps> = ({ pokemon, prev, next }) => {
 
   const router = useRouter()
-  const pageTitle = removeMinus(capitalizer(router.query.name.toString())) + " | Pokedex!"
+  let pageTitle = router.query.name ? removeMinus(capitalizer(router.query.name.toString())) + " | Pokedex!" : "Pokedex!"
 
   const replacer = (str: string, char: string) => str.replaceAll(char, ' ')
 
